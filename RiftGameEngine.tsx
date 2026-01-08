@@ -338,21 +338,18 @@ export const RiftGameEngine = forwardRef<any, RiftEngineProps>(({ onComplete, sh
             if (!s.vel) s.vel = { x: 0, y: 0 };
             
             // Movement
-            s.pos.x += s.vel.x;
-            s.pos.y += s.vel.y;
+            s.pos.x += s.vel!.x;
+            s.pos.y += s.vel!.y;
 
-            // Dampen velocity - INCREASED FRICTION
-            // Was: 0.95
-            s.vel.x *= 0.92;
-            s.vel.y *= 0.92;
+            // Dampen velocity
+            s.vel!.x *= 0.92;
+            s.vel!.y *= 0.92;
 
             // Always add a slight pull towards center to prevent them from getting stuck offscreen
-            // BUT REDUCED significantly so they don't walk in automatically
             const dxCenter = centerX - (s.pos.x + 30);
             const dyCenter = centerY - (s.pos.y + 30);
-            // Was: 0.0005
-            s.vel.x += dxCenter * 0.00015;
-            s.vel.y += dyCenter * 0.00015;
+            s.vel!.x += dxCenter * 0.00015;
+            s.vel!.y += dyCenter * 0.00015;
 
             // Check boundaries for "entering" logic
             const sCX = s.pos.x + 30;
@@ -365,10 +362,10 @@ export const RiftGameEngine = forwardRef<any, RiftEngineProps>(({ onComplete, sh
 
             if (spiritsEnteredRef.current.has(s.id)) {
                 // Wall repulsion (keep inside)
-                if (s.pos.x < WALL_BUFFER) s.vel.x += WALL_REPULSION;
-                if (s.pos.x > CANVAS_WIDTH - 60 - WALL_BUFFER) s.vel.x -= WALL_REPULSION;
-                if (s.pos.y < WALL_BUFFER) s.vel.y += WALL_REPULSION;
-                if (s.pos.y > CANVAS_HEIGHT - 60 - WALL_BUFFER) s.vel.y -= WALL_REPULSION;
+                if (s.pos.x < WALL_BUFFER) s.vel!.x += WALL_REPULSION;
+                if (s.pos.x > CANVAS_WIDTH - 60 - WALL_BUFFER) s.vel!.x -= WALL_REPULSION;
+                if (s.pos.y < WALL_BUFFER) s.vel!.y += WALL_REPULSION;
+                if (s.pos.y > CANVAS_HEIGHT - 60 - WALL_BUFFER) s.vel!.y -= WALL_REPULSION;
             }
 
             // Coil Attraction/Suck
@@ -376,12 +373,10 @@ export const RiftGameEngine = forwardRef<any, RiftEngineProps>(({ onComplete, sh
             const dy = coilCY - sCY;
             const distToCoil = Math.hypot(dx, dy);
 
-            // REDUCED SUCTION RANGE & FORCE
-            // Was: 150 range, 0.5 force
             if (distToCoil < 110) {
                 // Sucking effect - gentle at first, strong at end
-                s.vel.x += (dx / distToCoil) * 0.3;
-                s.vel.y += (dy / distToCoil) * 0.3;
+                s.vel!.x += (dx / distToCoil) * 0.3;
+                s.vel!.y += (dy / distToCoil) * 0.3;
                 
                 if (distToCoil < 40) {
                     s.active = false; // Captured!
@@ -407,8 +402,8 @@ export const RiftGameEngine = forwardRef<any, RiftEngineProps>(({ onComplete, sh
             
             if (pDist < 80) {
                  const pushForce = 2.0;
-                 s.vel.x += (pdx / pDist) * pushForce;
-                 s.vel.y += (pdy / pDist) * pushForce;
+                 s.vel!.x += (pdx / pDist) * pushForce;
+                 s.vel!.y += (pdy / pDist) * pushForce;
             }
 
             // Collision with Bots
@@ -421,8 +416,8 @@ export const RiftGameEngine = forwardRef<any, RiftEngineProps>(({ onComplete, sh
                 
                 if (bDist < 80) {
                      const pushForce = 1.5;
-                     s.vel.x += (bdx / bDist) * pushForce;
-                     s.vel.y += (bdy / bDist) * pushForce;
+                     s.vel!.x += (bdx / bDist) * pushForce;
+                     s.vel!.y += (bdy / bDist) * pushForce;
                 }
             });
         });
