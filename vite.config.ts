@@ -4,13 +4,12 @@ import react from '@vitejs/plugin-react'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  // 'base' is tricky: './' works for GitHub Pages but can cause issues on Vercel sub-routes.
-  // We use './' to maintain compatibility with both, but the vercel.json handles the routing there.
+  // Change base to './' to ensure assets load correctly in PWA/Standalone mode regardless of path
   base: './', 
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    sourcemap: false, // Disable sourcemaps to save memory/space
+    sourcemap: false,
   },
   server: {
     headers: {
