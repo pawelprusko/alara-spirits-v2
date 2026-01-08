@@ -1,0 +1,5 @@
+{
+  "name": "Alara Spirits",
+  "description": "A top-down pixel art ghost catching game featuring a custom game loop, asset fallback system, and progressive difficulty levels.",
+  "requestFramePermissions": []
+}
