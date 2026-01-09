@@ -954,6 +954,37 @@ export const GameEngine = forwardRef<GameEngineHandle, GameEngineProps>(({
        }
     }
 
+    // --- MONSTER COLLISION ---
+    for (const m of monstersRef.current) {
+        if (!m.active || m.isPossessed || m.isDoomed) continue; 
+        
+        // Monster "feet" collision box
+        const mRect = { 
+            x: m.pos.x + 25, 
+            y: m.pos.y + m.size.height - 35, 
+            width: m.size.width - 50, 
+            height: 35 
+        };
+
+        if (pRect.x < mRect.x + mRect.width && 
+            pRect.x + pRect.width > mRect.x && 
+            pRect.y < mRect.y + mRect.height && 
+            pRect.y + pRect.height > mRect.y) {
+                
+            const pushX = (playerRef.current.pos.x + 50) - (m.pos.x + m.size.width/2);
+            const pushY = (playerRef.current.pos.y + 100) - (m.pos.y + m.size.height - 10);
+            
+            playerRef.current.pos.x += Math.sign(pushX) * 3;
+            playerRef.current.pos.y += Math.sign(pushY) * 3;
+            
+            if (playerRef.current.vel) {
+                playerRef.current.vel.x *= -0.2;
+                playerRef.current.vel.y *= -0.2;
+            }
+        }
+    }
+    // ---------------------------------
+
     const idealCamY = playerRef.current.pos.y - (CANVAS_HEIGHT * 0.6);
     cameraRef.current.x += (Math.max(0, Math.min(MAP_WIDTH - CANVAS_WIDTH, playerRef.current.pos.x - CANVAS_WIDTH / 2 + 50)) - cameraRef.current.x) * 0.15;
     cameraRef.current.y += (Math.max(0, Math.min(MAP_HEIGHT - CANVAS_HEIGHT, idealCamY)) - cameraRef.current.y) * 0.15;
@@ -1833,7 +1864,6 @@ export const GameEngine = forwardRef<GameEngineHandle, GameEngineProps>(({
         ref={canvasRef} 
         width={CANVAS_WIDTH} 
         height={CANVAS_HEIGHT}
-        // ZMIANA: object-cover zamiast object-contain, aby usunąć paski
         className="block w-full h-full object-cover touch-none"
         style={{ imageRendering: 'pixelated' }}
     />
