@@ -8,12 +8,12 @@ html, body {
   overflow: hidden;
   background-color: #0f172a;
   width: 100vw;
-  height: 100%; /* Changed from 100dvh to 100% to work with fixed positioning */
-  position: fixed; /* Lock body to prevent scrolling */
+  height: 100%;
+  position: fixed; /* Keeps the app locked to viewport */
   top: 0;
   left: 0;
-  touch-action: none; /* Disables browser gestures */
-  overscroll-behavior: none; /* Critical: Prevents bounce effect showing black background */
+  /* touch-action: none;  <-- REMOVED: This blocked scrolling in Workshop/AssetManager */
+  overscroll-behavior: none; /* This prevents the rubber-band effect/black bar reveal */
 }
 
 #root {
