@@ -115,7 +115,7 @@ const SplashScreen = ({ assets, isFading }: { assets: AssetMap, isFading: boolea
             />
             {/* VERSION INDICATOR */}
             <div className="absolute bottom-12 left-0 right-0 text-center z-10 pointer-events-none">
-                <span className="text-[10px] font-mono text-purple-300/40 tracking-[0.3em] uppercase">v1.3.6 PWA</span>
+                <span className="text-[10px] font-mono text-purple-300/40 tracking-[0.3em] uppercase">v1.3.7 PWA FIX</span>
             </div>
         </div>
     );
@@ -872,9 +872,9 @@ export default function App() {
   );
 
   return (
-    <div className="min-h-screen bg-[#020617] flex items-center justify-center font-sans select-none overflow-hidden">
-        {/* Main Game Container - Fixed Aspect Ratio */}
-        <div className="w-full h-[100dvh] md:max-w-[45vh] md:h-auto md:max-h-[85vh] md:aspect-[9/16] bg-[#0f172a] relative shadow-[0_0_60px_black] border-x border-[#1e293b]">
+    <div className="fixed inset-0 w-full h-full bg-[#020617] flex items-center justify-center font-sans select-none overflow-hidden touch-none">
+        {/* Main Game Container - Fixed for Mobile, Aspect Ratio for Desktop */}
+        <div className="fixed inset-0 w-full h-full md:relative md:inset-auto md:w-auto md:h-auto md:max-w-[45vh] md:max-h-[85vh] md:aspect-[9/16] bg-[#0f172a] shadow-[0_0_60px_black] md:border-x border-[#1e293b]">
             {/* CANVAS LAYER (ABSOLUTE BOTTOM) */}
             <div className="absolute inset-0 z-0 w-full h-full bg-[#0f172a] transition-all overflow-hidden">
                 {gameStatus === GameStatus.RIFT ? (
