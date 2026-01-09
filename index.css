@@ -2,9 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
+html, body {
   margin: 0;
   padding: 0;
   overflow: hidden;
   background-color: #0f172a;
+  width: 100vw;
+  height: 100dvh; /* Dynamic Viewport Height - crucial for mobile */
+  position: fixed; /* Prevents rubber-banding/bouncing scroll on iOS */
+  top: 0;
+  left: 0;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
 }
