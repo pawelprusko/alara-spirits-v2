@@ -11,7 +11,9 @@ import {
 } from './customAssets';
 
 export const CANVAS_WIDTH = 360;
-export const CANVAS_HEIGHT = 640;
+// ZMIANA: Zwiększamy wysokość do 844px (standard nowoczesnych smartfonów 19.5:9), 
+// aby po rozciągnięciu (cover) nie ucinało zbyt dużo gry.
+export const CANVAS_HEIGHT = 844;
 export const MAP_WIDTH = 1000; 
 export const MAP_HEIGHT = 3000; 
 export const MAP_PADDING = 150; 
