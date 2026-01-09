@@ -8,11 +8,12 @@ html, body {
   overflow: hidden;
   background-color: #0f172a;
   width: 100vw;
-  height: 100dvh; /* Dynamic Viewport Height - crucial for mobile */
-  position: fixed; /* Prevents rubber-banding/bouncing scroll on iOS */
+  height: 100%; /* Changed from 100dvh to 100% to work with fixed positioning */
+  position: fixed; /* Lock body to prevent scrolling */
   top: 0;
   left: 0;
   touch-action: none; /* Disables browser gestures */
+  overscroll-behavior: none; /* Critical: Prevents bounce effect showing black background */
 }
 
 #root {
