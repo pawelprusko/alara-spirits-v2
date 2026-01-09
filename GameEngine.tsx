@@ -1833,7 +1833,8 @@ export const GameEngine = forwardRef<GameEngineHandle, GameEngineProps>(({
         ref={canvasRef} 
         width={CANVAS_WIDTH} 
         height={CANVAS_HEIGHT}
-        className="block w-full h-full object-contain touch-none"
+        // ZMIANA: object-cover zamiast object-contain, aby usunąć paski
+        className="block w-full h-full object-cover touch-none"
         style={{ imageRendering: 'pixelated' }}
     />
   );
