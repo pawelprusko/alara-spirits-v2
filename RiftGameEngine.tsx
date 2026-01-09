@@ -701,7 +701,8 @@ export const RiftGameEngine = forwardRef<any, RiftEngineProps>(({ onComplete, sh
             ref={canvasRef}
             width={CANVAS_WIDTH}
             height={CANVAS_HEIGHT}
-            className="block w-full h-full object-contain touch-none"
+            // CHANGED: Use w-full h-full to stretch and fill, removing all black bars
+            className="block w-full h-full touch-none"
             style={{ imageRendering: 'pixelated' }}
         />
     );
