@@ -4,7 +4,7 @@ import { WorkshopScreen } from './WorkshopScreen';
 import { RiftGameEngine } from './RiftGameEngine';
 import { AssetManager } from './components/AssetManager';
 import { GameStatus, LevelConfig, GameStats, GeneralStats, GameEngineHandle, Essence, MetaState, Quest, CapturedSpirit, AssetMap, ClassType, QuestType } from './types';
-import { INITIAL_LEVEL_CONFIG, POINTS_PER_GHOST, THEMES, CLASS_CONFIGS, DEFAULT_ASSETS, LEVEL_ADJECTIVES, LEVEL_NOUNS } from './constants';
+import { INITIAL_LEVEL_CONFIG, THEMES, CLASS_CONFIGS, DEFAULT_ASSETS } from './constants';
 
 // MEMOIZED GAME ENGINE WRAPPER TO PREVENT RE-RENDERS ON STAT UPDATES
 const MemoizedGameEngine = React.memo(GameEngine);
@@ -398,7 +398,7 @@ const EssenceSelectionScreen = ({ options, onSelect, assets, caughtSpiritName, c
     );
 };
 
-const App: React.FC = () => {
+export const App: React.FC = () => {
     // STATE
     const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.SPLASH);
     const [assets, setAssets] = useState<AssetMap>(DEFAULT_ASSETS);
@@ -430,6 +430,7 @@ const App: React.FC = () => {
     const [loadingProgress, setLoadingProgress] = useState(0);
     const [caughtSpiritName, setCaughtSpiritName] = useState("Unknown Spirit");
     const [essenceOptions, setEssenceOptions] = useState<[Essence, Essence] | null>(null);
+    const [floatingMessages, setFloatingMessages] = useState<{id: number, text: string, icon?: string}[]>([]);
 
     // RIFT STATE
     const [riftStats, setRiftStats] = useState({ time: 0, captured: 0, totalTime: 60 });
@@ -452,6 +453,14 @@ const App: React.FC = () => {
     useEffect(() => {
         localStorage.setItem('alara_meta', JSON.stringify(metaState));
     }, [metaState]);
+
+    const showFloatingMessage = useCallback((text: string, icon?: string, duration: number = 2000) => {
+        const id = Math.random();
+        setFloatingMessages(prev => [...prev, { id, text, icon }]);
+        setTimeout(() => {
+            setFloatingMessages(prev => prev.filter(m => m.id !== id));
+        }, duration);
+    }, []);
 
     // Helpers
     const generateQuests = (level: number): Quest[] => {
@@ -544,3 +553,175 @@ const App: React.FC = () => {
     const handleRiftComplete = (success: boolean) => {
         if (success) {
             setMetaState(prev => ({
+                ...prev,
+                ectoplasm: prev.ectoplasm + 500, // Big reward
+                inventory: [...prev.inventory, {
+                    id: `rift-${Date.now()}`,
+                    tier: 3, // Reward a tier 3 spirit
+                    name: "Rift Walker",
+                    powerValue: 300,
+                    dateCaught: Date.now()
+                }]
+            }));
+            showFloatingMessage("RIFT CLOSED - REWARD CLAIMED", "🌌");
+        } else {
+            showFloatingMessage("RIFT COLLAPSED", "💀");
+        }
+        setGameStatus(GameStatus.WORKSHOP);
+    };
+
+    const handleOpenAssetManager = () => {
+        setShowAssetManager(true);
+    };
+
+    const handleSaveAssets = (newAssets: AssetMap) => {
+        setAssets(newAssets);
+    };
+
+    return (
+        <div className="w-full h-full relative overflow-hidden bg-[#0f172a]">
+            {/* GLOBAL UI LAYERS */}
+            {gameStatus === GameStatus.SPLASH && (
+                <SplashScreen assets={assets} isFading={false} />
+            )}
+
+            {gameStatus === GameStatus.LOADING && (
+                <LoadingScreen 
+                    levelConfig={levelConfig} 
+                    quests={quests} 
+                    assets={assets} 
+                    progress={loadingProgress} 
+                />
+            )}
+
+            {gameStatus === GameStatus.ESSENCE_SELECTION && (
+                <EssenceSelectionScreen 
+                    options={essenceOptions} 
+                    onSelect={handleEssenceSelect} 
+                    assets={assets}
+                    caughtSpiritName={caughtSpiritName}
+                    currentEssence={currentEssence}
+                    quests={quests}
+                    levelNumber={levelConfig.levelNumber}
+                />
+            )}
+
+            {gameStatus === GameStatus.WORKSHOP && (
+                <>
+                    {showAssetManager && (
+                        <AssetManager 
+                            currentAssets={assets} 
+                            onSaveAssets={handleSaveAssets} 
+                            onClose={() => setShowAssetManager(false)} 
+                        />
+                    )}
+                    <WorkshopScreen 
+                        metaState={metaState}
+                        onUpdateMeta={setMetaState}
+                        onExit={() => setGameStatus(GameStatus.SPLASH)} 
+                        onPlay={startGame}
+                        assets={assets}
+                        onOpenAssetManager={handleOpenAssetManager}
+                        showFloatingMessage={showFloatingMessage}
+                        currentEssence={currentEssence}
+                        generalStats={generalStats}
+                    />
+                </>
+            )}
+
+            {/* GAME ENGINES */}
+            {gameStatus === GameStatus.PLAYING && (
+                <>
+                    <TopHUD 
+                        score={0} 
+                        ectoplasm={metaState.ectoplasm}
+                        levelConfig={levelConfig}
+                        onWorkshopClick={() => gameEngineRef.current?.triggerWorkshopTransition()}
+                        assets={assets}
+                        quests={quests}
+                        isRift={false}
+                        riftCaptured={0}
+                        riftTarget={0}
+                    />
+                    <TutorialOverlay 
+                        step={tutorialStep} 
+                        onNext={() => setTutorialStep(2)} 
+                        onDismiss={() => {
+                            setTutorialStep(0);
+                            localStorage.setItem('alara_tutorial_done', 'true');
+                        }} 
+                    />
+                    <MemoizedGameEngine
+                        ref={gameEngineRef}
+                        gameStatus={gameStatus}
+                        levelConfig={levelConfig}
+                        generalStats={generalStats}
+                        onStatsUpdate={setGameStats}
+                        onLevelComplete={handleLevelComplete}
+                        onGhostCaught={() => {}}
+                        onItemCollect={() => {
+                            setMetaState(prev => ({...prev, ectoplasm: prev.ectoplasm + 10}));
+                            handleQuestProgress('COLLECT_ECTO', 1);
+                        }}
+                        showFloatingMessage={showFloatingMessage}
+                        onWorkshopOpen={() => setGameStatus(GameStatus.WORKSHOP)}
+                        onEnterRift={() => {
+                            setGameStatus(GameStatus.RIFT_INTRO);
+                            setTimeout(() => setGameStatus(GameStatus.RIFT), 2000); // Fake load
+                        }}
+                        currentEssence={currentEssence}
+                        onQuestProgress={handleQuestProgress}
+                        assets={assets}
+                        paused={tutorialStep > 0}
+                    />
+                </>
+            )}
+
+            {gameStatus === GameStatus.RIFT_INTRO && (
+                 <LoadingScreen 
+                    isRift={true}
+                    levelConfig={levelConfig} 
+                    quests={[]} 
+                    assets={assets} 
+                    progress={100} 
+                    riftConfig={{ target: 20, players: 1 }}
+                />
+            )}
+
+            {gameStatus === GameStatus.RIFT && (
+                <>
+                    <TopHUD 
+                        score={0}
+                        ectoplasm={metaState.ectoplasm}
+                        levelConfig={levelConfig}
+                        onWorkshopClick={() => {}}
+                        assets={assets}
+                        quests={[]}
+                        isRift={true}
+                        riftCaptured={riftStats.captured}
+                        riftTarget={20}
+                    />
+                    <MemoizedRiftEngine
+                        onComplete={handleRiftComplete}
+                        showFloatingMessage={showFloatingMessage}
+                        currentEssence={currentEssence}
+                        onStatsUpdate={setRiftStats}
+                        targetScore={20}
+                        playerCount={1}
+                        assets={assets}
+                    />
+                </>
+            )}
+            
+            {/* FLOATING MESSAGES CONTAINER */}
+            <div className="fixed top-24 left-1/2 -translate-x-1/2 pointer-events-none z-[9999] flex flex-col gap-2">
+                {floatingMessages.map(msg => (
+                    <div key={msg.id} className="animate-in fade-in slide-in-from-bottom-2 duration-300 bg-slate-900/90 text-white px-4 py-2 rounded-full border border-slate-700 shadow-xl flex items-center gap-2">
+                        {msg.icon && <span className="text-xl">{msg.icon}</span>}
+                        <span className="font-gothic font-bold text-sm tracking-wide">{msg.text}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
