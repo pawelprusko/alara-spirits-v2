@@ -115,7 +115,7 @@ const SplashScreen = ({ assets, isFading }: { assets: AssetMap, isFading: boolea
             />
             {/* VERSION INDICATOR */}
             <div className="absolute bottom-12 left-0 right-0 text-center z-10 pointer-events-none">
-                <span className="text-[10px] font-mono text-purple-300/40 tracking-[0.3em] uppercase">v1.3.7 PWA FIX</span>
+                <span className="text-[10px] font-mono text-purple-300/40 tracking-[0.3em] uppercase">v1.3.9 SCROLL FIX</span>
             </div>
         </div>
     );
@@ -792,8 +792,9 @@ export default function App() {
   };
 
   const handleStatsUpdate = useCallback((newStats: GameStats) => setStats(newStats), []);
-  const handleRiftStatsUpdate = useCallback((stats: { time: number, captured: number }) => {
-      setStats(prev => ({ ...prev, timeRemaining: stats.time }));
+  // UPDATED SIGNATURE TO MATCH RIFT ENGINE INTERFACE
+  const handleRiftStatsUpdate = useCallback((stats: { time: number, captured: number, totalTime: number }) => {
+      setStats(prev => ({ ...prev, timeRemaining: stats.time, totalTime: stats.totalTime }));
       setRiftCapturedCount(stats.captured);
   }, []);
   
