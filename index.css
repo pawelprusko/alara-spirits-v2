@@ -12,6 +12,7 @@ html, body {
   position: fixed; /* Prevents rubber-banding/bouncing scroll on iOS */
   top: 0;
   left: 0;
+  touch-action: none; /* Disables browser gestures */
 }
 
 #root {
