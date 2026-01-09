@@ -3,7 +3,7 @@ import { GameEngine } from './GameEngine';
 import { WorkshopScreen } from './WorkshopScreen';
 import { RiftGameEngine } from './RiftGameEngine';
 import { AssetManager } from './components/AssetManager';
-import { GameStatus, LevelConfig, GameStats, GeneralStats, GameEngineHandle, Essence, MetaState, Quest, CapturedSpirit, AssetMap, ClassType } from './types';
+import { GameStatus, LevelConfig, GameStats, GeneralStats, GameEngineHandle, Essence, MetaState, Quest, CapturedSpirit, AssetMap, ClassType, QuestType } from './types';
 import { INITIAL_LEVEL_CONFIG, POINTS_PER_GHOST, THEMES, CLASS_CONFIGS, DEFAULT_ASSETS, LEVEL_ADJECTIVES, LEVEL_NOUNS } from './constants';
 
 // MEMOIZED GAME ENGINE WRAPPER TO PREVENT RE-RENDERS ON STAT UPDATES
@@ -43,7 +43,7 @@ const EssenceCard: React.FC<{ essence: Essence, compareTo: Essence, onSelect: ()
     const cleanDesc = essence.specialDescription.replace(/<b>.*?<\/b>:\s*/, '');
 
     return (
-        <div className={`bg-slate-900/95 border border-slate-600 rounded-xl p-2 flex flex-col gap-1.5 shadow-xl relative overflow-hidden transition-all hover:border-[#a855f7]/50 w-full flex-1 min-h-0`}>
+        <div className={`bg-slate-900/95 border border-slate-600 rounded-xl p-2 flex flex-col gap-1 shadow-xl relative overflow-hidden transition-all hover:border-[#a855f7]/50 w-full flex-1 min-h-0`}>
             {/* Header: Icon + Name + Desc */}
             <div className="flex items-center gap-2 shrink-0">
                 <div className="w-10 h-10 relative flex items-center justify-center shrink-0 bg-slate-800 rounded-lg border border-slate-600 overflow-hidden shadow-inner">
@@ -83,7 +83,7 @@ const EssenceCard: React.FC<{ essence: Essence, compareTo: Essence, onSelect: ()
             </div>
 
             {/* Ability Section */}
-            <div className="bg-slate-950/40 rounded-lg p-1.5 border border-white/10 flex flex-col gap-0.5 shrink-0">
+            <div className="bg-slate-950/40 rounded-lg p-1 border border-white/10 flex flex-col gap-0.5 shrink-0">
                  <div className="flex items-center justify-between border-b border-white/10 pb-0.5 mb-0.5">
                      <span className="text-[10px] text-slate-300 font-bold uppercase tracking-wider">{abilityName}</span>
                      <div className="text-[10px] font-mono text-[#a855f7] font-bold">
@@ -97,7 +97,7 @@ const EssenceCard: React.FC<{ essence: Essence, compareTo: Essence, onSelect: ()
             {/* Button - Now closer to content */}
             <button 
                 onClick={onSelect}
-                className="w-full bg-[#1e293b] hover:bg-[#a855f7] hover:text-white text-emerald-400 font-bold py-2.5 rounded-lg border border-emerald-500/30 hover:border-transparent uppercase tracking-[0.15em] text-xs transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2 group mt-auto"
+                className="w-full bg-[#1e293b] hover:bg-[#a855f7] hover:text-white text-emerald-400 font-bold py-2 rounded-lg border border-emerald-500/30 hover:border-transparent uppercase tracking-[0.15em] text-xs transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2 group mt-auto"
             >
                 <span className="group-hover:text-white">SELECT FORM</span>
             </button>
@@ -115,7 +115,7 @@ const SplashScreen = ({ assets, isFading }: { assets: AssetMap, isFading: boolea
             />
             {/* VERSION INDICATOR */}
             <div className="absolute bottom-12 left-0 right-0 text-center z-10 pointer-events-none">
-                <span className="text-[10px] font-mono text-purple-300/40 tracking-[0.3em] uppercase">v1.3.5 PWA</span>
+                <span className="text-[10px] font-mono text-purple-300/40 tracking-[0.3em] uppercase">v1.3.6 FULLSCREEN</span>
             </div>
         </div>
     );
@@ -181,8 +181,9 @@ const EctoIcon = ({ className }: { className?: string }) => (
 );
 
 // --- HUD COMPONENT ---
+// ZMIANA: Dodano `pt-[max(1rem,env(safe-area-inset-top))]`, aby interfejs odsunął się od góry telefonu (notcha)
 const TopHUD = ({ score, ectoplasm, levelConfig, onWorkshopClick, assets, quests, isRift, riftCaptured, riftTarget }: { score: number, ectoplasm: number, levelConfig: LevelConfig, onWorkshopClick: () => void, assets: AssetMap, quests: Quest[], isRift: boolean, riftCaptured: number, riftTarget: number }) => (
-    <div className="absolute top-0 left-0 right-0 p-4 z-[100] flex justify-between items-start pointer-events-none">
+    <div className="absolute top-0 left-0 right-0 p-4 pt-[max(1rem,env(safe-area-inset-top))] z-[100] flex justify-between items-start pointer-events-none">
         <div className="flex flex-col gap-1 pointer-events-auto">
             {!isRift && (
                 <div className="flex items-center gap-2 bg-slate-950/80 border border-slate-700 rounded-full px-3 py-1.5 backdrop-blur-md shadow-lg">
@@ -192,7 +193,7 @@ const TopHUD = ({ score, ectoplasm, levelConfig, onWorkshopClick, assets, quests
             )}
         </div>
 
-        <div className="flex flex-col items-center absolute left-1/2 -translate-x-1/2 top-4 w-full max-w-[200px]">
+        <div className="flex flex-col items-center absolute left-1/2 -translate-x-1/2 top-4 pt-[env(safe-area-inset-top)] w-full max-w-[200px]">
             <h1 className={`font-gothic text-lg tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] opacity-90 text-center leading-none mb-1 truncate w-full ${isRift ? 'text-red-500 font-bold' : 'text-slate-200'}`}>
                 {isRift ? "Secret Dimension" : levelConfig.theme.name}
             </h1>
@@ -341,18 +342,18 @@ const EssenceSelectionScreen = ({ options, onSelect, assets, caughtSpiritName, c
     }
 
     return (
-        <div className="absolute inset-0 z-50 bg-[#020617]/95 backdrop-blur-md flex flex-col animate-in fade-in zoom-in duration-300 overflow-hidden">
-            <div className="flex-none flex flex-col items-center justify-center py-2 mb-1 border-b border-[#a855f7]/20 bg-slate-900/50">
-                <span className="text-[10px] font-bold text-[#d8b4fe] tracking-[0.2em] uppercase mb-1">Spirit Contained</span>
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#1e293b] border border-[#a855f7] flex items-center justify-center shadow-[0_0_15px_#a855f7]">
-                        <img src={assets.loadingGhost} className="w-7 h-7 object-contain" />
+        <div className="absolute inset-0 z-50 bg-[#020617]/95 backdrop-blur-md flex flex-col animate-in fade-in zoom-in duration-300 overflow-hidden pt-[env(safe-area-inset-top)]">
+            <div className="flex-none mb-2 px-4 mt-8">
+                <div className="flex items-center justify-center gap-3 mb-2">
+                    <div className="w-12 h-12 rounded-full bg-[#1e293b] border border-[#a855f7] flex items-center justify-center shadow-[0_0_15px_#a855f7]">
+                        <img src={assets.loadingGhost} className="w-8 h-8 object-contain" />
                     </div>
-                    <h1 className="text-2xl font-gothic font-bold text-white drop-shadow-[0_0_10px_#a855f7]">{caughtSpiritName}</h1>
+                    <div>
+                        <span className="text-[10px] font-bold text-[#d8b4fe] tracking-[0.2em] uppercase block">Spirit Contained</span>
+                        <h1 className="text-2xl font-gothic font-bold text-white drop-shadow-[0_0_10px_#a855f7] leading-none">{caughtSpiritName}</h1>
+                    </div>
                 </div>
-            </div>
-            
-            <div className="flex-none mb-2 px-4">
+                
                 <div className="bg-[#1e1b4b]/60 border border-blue-500/20 rounded-lg p-3 text-center">
                     <p className="text-xs text-blue-100 leading-tight">
                         <span className="font-bold text-blue-400 block mb-1 uppercase tracking-widest text-[10px]">Instability Detected</span>
@@ -367,29 +368,29 @@ const EssenceSelectionScreen = ({ options, onSelect, assets, caughtSpiritName, c
                  ))}
             </div>
 
-            <div className="shrink-0 bg-gradient-to-r from-purple-900/80 to-slate-900/90 border-t border-purple-500/30 p-3 flex justify-between items-center shadow-[0_-5px_30px_rgba(168,85,247,0.3)]">
+            <div className="shrink-0 bg-gradient-to-r from-purple-900/80 to-slate-900/90 border-t border-purple-500/30 p-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] flex justify-between items-center shadow-[0_-5px_30px_rgba(168,85,247,0.3)]">
                 <div>
                     <h3 className={`text-[10px] uppercase tracking-[0.2em] font-bold mb-0.5 ${!isSuccess ? 'text-orange-300' : 'text-purple-200'}`}>Mission Status</h3>
-                    <div className={`text-xl font-gothic leading-none ${!isSuccess ? 'text-orange-200' : 'text-white'}`}>
-                        {!isSuccess ? 'PARTIAL SUCCESS' : 'SUCCESS'}
+                    <div className="flex items-center gap-2">
+                         {isSuccess ? (
+                             <span className="text-emerald-400 font-bold text-[10px] bg-emerald-900/30 px-2 py-0.5 rounded border border-emerald-500/30">READY FOR TRANSFER</span>
+                         ) : (
+                             <span className="text-orange-400 font-bold text-[10px] bg-orange-900/30 px-2 py-0.5 rounded border border-orange-500/30">OBJECTIVES PENDING</span>
+                         )}
                     </div>
                 </div>
-                {isSuccess && (
+                
+                {isSuccess ? (
                     <div className="text-right">
-                        <span className="text-[10px] uppercase tracking-wider text-amber-300 font-bold block mb-0.5">Reward</span>
-                        <div className="flex items-center justify-end gap-2">
-                            <span className="text-2xl font-bold font-gothic text-white drop-shadow-[0_0_5px_#facc15]">+{calculatedReward}</span>
-                            <EctoIcon className="w-7 h-7 shadow-[0_0_10px_#a855f7]" />
-                        </div>
+                         <div className="text-[10px] text-purple-200 uppercase tracking-widest font-bold">Total Bounty</div>
+                         <div className="text-xl font-gothic text-white drop-shadow-[0_0_5px_#a855f7] flex items-center justify-end gap-1">
+                             +{calculatedReward} <EctoIcon className="w-5 h-5" />
+                         </div>
                     </div>
-                )}
-                {!isSuccess && (
+                ) : (
                     <div className="text-right opacity-50">
-                        <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold block mb-0.5">Reward</span>
-                        <div className="flex items-center justify-end gap-2">
-                            <span className="text-2xl font-bold font-gothic text-slate-500">0</span>
-                            <div className="grayscale opacity-50"><EctoIcon className="w-7 h-7" /></div>
-                        </div>
+                        <div className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Bounty Locked</div>
+                        <div className="text-xs text-slate-500 font-mono">Complete Quests</div>
                     </div>
                 )}
             </div>
@@ -397,596 +398,149 @@ const EssenceSelectionScreen = ({ options, onSelect, assets, caughtSpiritName, c
     );
 };
 
-const BottomPanel = ({ stats, levelConfig, isRift }: { stats: GameStats, levelConfig: LevelConfig, isRift: boolean }) => {
-    const rotationDeg = (stats.compassAngle * 180 / Math.PI) + 90;
-    const spiritProgress = Math.max(0, Math.min(100, (1 - (stats.ghostHealth / stats.maxGhostHealth)) * 100));
-    
-    const maxTime = stats.totalTime || (isRift ? 30 : levelConfig.timeLimit);
-    const timePercentage = Math.max(0, Math.min(100, (stats.timeRemaining / maxTime) * 100));
-
-    return (
-      <div className="absolute bottom-8 left-4 right-4 h-auto flex items-end justify-center z-20 pointer-events-none">
-          <div className={`w-full backdrop-blur-md p-4 rounded-3xl border shadow-[0_0_30px_rgba(0,0,0,0.6)] flex items-center gap-4 ${isRift ? 'bg-[#0f172a]/60 border-white/10' : 'bg-[#0f172a]/60 border-white/10'}`}>
-              <div className="flex-1 flex flex-col gap-3">
-                  <div className="flex flex-col gap-1">
-                      <span className={`text-[10px] font-gothic tracking-widest drop-shadow-md ml-1 ${isRift ? 'text-red-400 font-bold' : 'text-slate-200'}`}>
-                          DIMENSION COLLAPSE
-                      </span>
-                      <div className="flex items-center gap-2">
-                          <div className="flex-1 h-2 bg-[#020617]/60 rounded-full overflow-hidden relative border border-white/5">
-                              {/* Removed transition-all duration-100 to fix stuttering/rubber-banding */}
-                              <div className={`h-full bg-gradient-to-r shadow-[0_0_10px] ${isRift ? 'from-red-600 to-orange-500 shadow-red-500' : 'from-[#f59e0b] to-[#fbbf24] shadow-[#f59e0b]'}`} style={{ width: `${timePercentage}%` }}></div>
-                          </div>
-                          <span className={`text-[10px] font-gothic tracking-widest w-8 text-right ${isRift ? 'text-red-200' : 'text-slate-200'}`}>{Math.ceil(stats.timeRemaining)}s</span>
-                      </div>
-                  </div>
-                  {!isRift && (
-                      <div className="flex flex-col gap-1">
-                          <span className="text-[10px] font-gothic text-slate-200 tracking-widest drop-shadow-md ml-1">SPIRIT ESSENCE</span>
-                          <div className="flex items-center gap-2">
-                              <div className="flex-1 h-2 bg-[#020617]/60 rounded-full overflow-hidden relative border border-white/5">
-                                  <div className="h-full bg-gradient-to-r from-[#9333ea] to-[#d8b4fe] shadow-[0_0_10px_#a855f7] transition-all duration-300 ease-linear" style={{ width: `${spiritProgress}%` }}></div>
-                              </div>
-                              <span className="text-[10px] font-gothic text-slate-200 tracking-widest w-8 text-right">{Math.floor(spiritProgress)}%</span>
-                          </div>
-                      </div>
-                  )}
-              </div>
-              {!isRift && (
-                  <>
-                      <div className="w-px h-12 bg-white/10"></div>
-                      <div className="flex flex-col items-center justify-center shrink-0 w-16">
-                          <div className="w-12 h-12 relative flex items-center justify-center mb-1">
-                              <div className="absolute inset-0 rounded-full border border-[#5eead4]/30 shadow-[0_0_10px_rgba(94,234,212,0.2)]"></div>
-                              <div className="w-full h-full flex items-center justify-center transition-transform duration-150 ease-out" style={{ transform: `rotate(${rotationDeg}deg)` }}>
-                                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="drop-shadow-[0_0_5px_#a855f7]"><path d="M12 2L4 21L12 17L20 21L12 2Z" fill="#a855f7" stroke="#fff" strokeWidth="1.5"/></svg>
-                              </div>
-                          </div>
-                          <div className="flex flex-col items-center leading-none mt-1">
-                              <span className="text-[10px] font-gothic text-slate-200 tracking-widest drop-shadow-md">SPIRIT</span>
-                              <span className="text-[10px] font-gothic text-slate-200 tracking-widest drop-shadow-md">DIRECTION</span>
-                          </div>
-                      </div>
-                  </>
-              )}
-          </div>
-      </div>
-    );
-};
-
-export default function App() {
-  const [assets, setAssets] = useState<AssetMap>(DEFAULT_ASSETS);
-  const [showAssetManager, setShowAssetManager] = useState(false);
-
-  useEffect(() => {
-      const stored = localStorage.getItem('custom_game_assets');
-      if (stored) {
-          try {
-              setAssets({ ...DEFAULT_ASSETS, ...JSON.parse(stored) });
-          } catch (e) { console.error("Failed to load custom assets", e); }
-      }
-  }, []);
-
-  const handleUpdateAssets = (newAssets: AssetMap) => {
-      const customs: AssetMap = {};
-      Object.keys(newAssets).forEach(k => {
-          if (newAssets[k] !== DEFAULT_ASSETS[k]) customs[k] = newAssets[k];
-      });
-      localStorage.setItem('custom_game_assets', JSON.stringify(customs));
-      setAssets(newAssets);
-  };
-
-  const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.SPLASH);
-  const [showSplash, setShowSplash] = useState(true);
-  const [splashFading, setSplashFading] = useState(false);
-  
-  const [levelConfig, setLevelConfig] = useState<LevelConfig>(INITIAL_LEVEL_CONFIG);
-  const [score, setScore] = useState(0);
-  const [message, setMessage] = useState<{text: string, icon?: string, id: number} | null>(null);
-  const [loadingProgress, setLoadingProgress] = useState(0);
-  const engineRef = useRef<GameEngineHandle>(null);
-  const loadingIntervalRef = useRef<any>(null); 
-  const lastThemeTypeRef = useRef<string | null>(null); // To prevent repeat levels
-  
-  const [tutorialStep, setTutorialStep] = useState(0);
-  const [hasSeenTutorial, setHasSeenTutorial] = useState(false);
-
-  useEffect(() => {
-      const seen = localStorage.getItem('alara_tutorial_seen');
-      if (seen) setHasSeenTutorial(true);
-  }, []);
-
-  const handleDismissTutorial = () => {
-      setTutorialStep(0);
-      setHasSeenTutorial(true);
-      localStorage.setItem('alara_tutorial_seen', 'true');
-  };
-
-  const handleNextTutorial = () => {
-      setTutorialStep(prev => prev + 1);
-  };
-  
-  const [riftWinState, setRiftWinState] = useState<'WIN' | 'LOSS' | null>(null);
-  const [riftConfig, setRiftConfig] = useState({ target: 10, players: 3 });
-  
-  const [metaState, setMetaState] = useState<MetaState>({ 
-      ectoplasm: 0, 
-      inventory: [], 
-      unlockedRecipes: [] 
-  });
-  
-  const [quests, setQuests] = useState<Quest[]>([]);
-  // Use Ref to track quests for fresh access in callbacks
-  const questsRef = useRef<Quest[]>(quests);
-  
-  // NOTE: This effect is fine for initial mount, but we need synchronous updates in handleQuestProgress
-  useEffect(() => { questsRef.current = quests; }, [quests]);
-
-  const [caughtSpiritName, setCaughtSpiritName] = useState<string>("Unknown Entity");
-  const [currentEssence, setCurrentEssence] = useState<Essence>(() => {
-      const base = CLASS_CONFIGS.SCIENTIST;
-      return { ...base, stats: { ...base.stats, specialChance: 0.25 } };
-  });
-  const [pendingOptions, setPendingOptions] = useState<[Essence, Essence] | null>(null);
-  const [generalStats, setGeneralStats] = useState<GeneralStats>({ catcherPower: 120, essencePower: 88, dropChance: 75, dimensionRift: 25 });
-  const [stats, setStats] = useState<GameStats>({ ghostHealth: 1, maxGhostHealth: 1, compassAngle: 0, timeRemaining: 0, totalTime: 45, isCapturing: false });
-  const [riftCapturedCount, setRiftCapturedCount] = useState(0);
-  
-  // Removed lastMissionReward state as it's now calculated in render
-  
-  const showFloatingMessage = (text: string, icon?: string, duration: number = 2500) => {
-    setMessage({ text, icon, id: Date.now() });
-    setTimeout(() => setMessage(current => (current && current.text === text ? null : current)), duration);
-  };
-
-  const handleQuestProgress = useCallback((type: 'KILL_COUNT' | 'COLLECT_ECTO' | 'CATCH_GHOST', amount: number = 1) => {
-      setQuests(prev => {
-          const nextQuests = prev.map(q => {
-              if (q.type === type) {
-                  // Simply increment and clamp to target. Removed toast & instant reward.
-                  const newProg = Math.min(q.target, q.progress + amount);
-                  return { ...q, progress: newProg, completed: newProg >= q.target };
-              }
-              return q;
-          });
-          questsRef.current = nextQuests;
-          return nextQuests;
-      });
-  }, []);
-
-  const handleItemCollect = useCallback(() => {
-     // 50% chance for CLASS BOOST, 50% chance for MASTERY BOOST
-     const roll = Math.random();
-     
-     if (roll < 0.5) {
-         // CLASS STATS
-         const stats = ['damage', 'range', 'speed'];
-         const chosenStat = stats[Math.floor(Math.random() * stats.length)] as keyof Essence['stats'];
-         let boost = 0;
-         let label = '';
-
-         if (chosenStat === 'damage') { boost = 5; label = 'DMG'; }
-         else if (chosenStat === 'range') { boost = 5; label = 'RNG'; }
-         else if (chosenStat === 'speed') { boost = 0.05; label = 'SPD'; }
-
-         setCurrentEssence(prev => {
-             const newStats = { ...prev.stats };
-             if (chosenStat === 'speed') newStats[chosenStat] = parseFloat((newStats[chosenStat] + boost).toFixed(2));
-             else newStats[chosenStat] += boost;
-             return { ...prev, stats: newStats };
-         });
-         showFloatingMessage(`${label} +${chosenStat === 'speed' ? (boost*100).toFixed(0) + '%' : boost}`, "⚡", 1500);
-     } else {
-         // GENERAL MASTERY STATS
-         const stats = ['catcherPower', 'essencePower', 'dropChance', 'dimensionRift'];
-         const chosenStat = stats[Math.floor(Math.random() * stats.length)] as keyof GeneralStats;
-         let boost = 0;
-         let label = '';
-         
-         if (chosenStat === 'catcherPower') { boost = 5; label = 'Catcher Power'; }
-         else if (chosenStat === 'essencePower') { boost = 5; label = 'Essence Power'; }
-         else if (chosenStat === 'dropChance') { boost = 1; label = 'Drop Chance'; }
-         else if (chosenStat === 'dimensionRift') { boost = 1; label = 'Rift Resonance'; }
-         
-         setGeneralStats(prev => ({
-             ...prev,
-             [chosenStat]: prev[chosenStat] + boost
-         }));
-         const valDisplay = (chosenStat === 'dropChance' || chosenStat === 'dimensionRift') ? `${boost}%` : boost;
-         showFloatingMessage(`${label} +${valDisplay}`, "🔮", 1500);
-     }
-
-     handleQuestProgress('COLLECT_ECTO', 1);
-  }, [handleQuestProgress]);
-
-  const generateQuests = (level: number): Quest[] => {
-      const q1: Quest = { id: 'q1', type: 'KILL_COUNT', target: 5 + Math.floor(level/2), progress: 0, completed: false, description: 'Purge Monsters', reward: 15 };
-      const q2: Quest = { id: 'q2', type: 'COLLECT_ECTO', target: 3 + Math.floor(level/3), progress: 0, completed: false, description: 'Gather Essence', reward: 20 };
-      const q3: Quest = { id: 'q3', type: 'CATCH_GHOST', target: 1, progress: 0, completed: false, description: 'Capture Spirit', reward: 50 };
-      return [q1, q2, q3];
-  };
-
-  // Init quests on mount so Loading Screen has content
-  useEffect(() => {
-      setQuests(generateQuests(INITIAL_LEVEL_CONFIG.levelNumber));
-  }, []);
-
-  const startLevelLoad = useCallback(() => {
-      if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
-      setRiftWinState(null);
-      setGameStatus(GameStatus.LOADING); 
-      setLoadingProgress(0);
-      setPendingOptions(null);
-      setRiftCapturedCount(0);
-      
-      // Clear any messages when starting new level
-      setMessage(null);
-      
-      // Select Next Theme (Avoiding immediate repeat)
-      const availableThemes = THEMES.filter(t => t.type !== 'DIMENSION');
-      let candidates = availableThemes.filter(t => t.type !== lastThemeTypeRef.current);
-      // Fallback if filtering removed everything (shouldn't happen with 3 themes)
-      if (candidates.length === 0) candidates = availableThemes;
-      
-      const nextTheme = candidates[Math.floor(Math.random() * candidates.length)];
-      lastThemeTypeRef.current = nextTheme.type;
-
-      const randomName = `${LEVEL_ADJECTIVES[Math.floor(Math.random() * LEVEL_ADJECTIVES.length)]} ${LEVEL_NOUNS[Math.floor(Math.random() * LEVEL_NOUNS.length)]}`;
-      const nextThemeWithName = { ...nextTheme, name: randomName };
-      
-      setLevelConfig(prev => ({
-          ...prev,
-          theme: nextThemeWithName,
-          levelNumber: prev.levelNumber + 1,
-          monsterCount: Math.min(50, prev.monsterCount + 3), 
-          // FIXED: Use 45s as requested
-          timeLimit: 45,
-      }));
-      setQuests(generateQuests(levelConfig.levelNumber + 1));
-      
-      // Simulate Loading
-      let prog = 0;
-      loadingIntervalRef.current = setInterval(() => {
-          prog += 1; 
-          setLoadingProgress(prog);
-          if (prog >= 100) {
-              if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
-              loadingIntervalRef.current = null;
-              setGameStatus(GameStatus.PLAYING);
-              
-              if (!hasSeenTutorial && !localStorage.getItem('alara_tutorial_seen')) {
-                  setTimeout(() => setTutorialStep(1), 1500); 
-              }
-          }
-      }, 30);
-  }, [levelConfig.levelNumber, gameStatus, hasSeenTutorial]);
-
-  useEffect(() => {
-      // INITIAL SPLASH LOGIC
-      if (gameStatus === GameStatus.SPLASH) {
-          const waitTimer = setTimeout(() => {
-              // Start loading BEHIND the splash screen so when it fades, loading screen is there
-              startLevelLoad(); 
-              setSplashFading(true);
-              
-              setTimeout(() => {
-                  setShowSplash(false);
-              }, 1000); // Wait for fade out
-          }, 2000); // Show splash for 2s
-          
-          return () => clearTimeout(waitTimer);
-      }
-  }, [gameStatus, startLevelLoad]);
-
-  const generateGhostName = () => {
-      const adjectives = ["Restless", "Vengeful", "Silent", "Crimson", "Hollow", "Static", "Ancient", "Dark", "Echoing"];
-      const types = ["Wisp", "Wraith", "Phantom", "Poltergeist", "Specter", "Shadow", "Spirit"];
-      const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-      const type = types[Math.floor(Math.random() * types.length)];
-      return `${adj} ${type}`;
-  };
-
-  const handleGhostCaught = () => {
-      handleQuestProgress('CATCH_GHOST', 1);
-      setCaughtSpiritName(generateGhostName());
-      setMessage(null);
-      
-      const availableClasses: ClassType[] = ['SCIENTIST', 'MONK', 'THIEF'];
-      
-      // Pick 2 random classes (different from each other)
-      const idx1 = Math.floor(Math.random() * availableClasses.length);
-      let idx2 = Math.floor(Math.random() * availableClasses.length);
-      while (idx1 === idx2) {
-          idx2 = Math.floor(Math.random() * availableClasses.length);
-      }
-      
-      const type1 = availableClasses[idx1];
-      const type2 = availableClasses[idx2];
-      
-      const base1 = CLASS_CONFIGS[type1];
-      const base2 = CLASS_CONFIGS[type2];
-
-      const opt1: Essence = { 
-          ...base1, 
-          id: `gen_${Date.now()}_1`, 
-          stats: { 
-              ...base1.stats, 
-              damage: Math.floor(base1.stats.damage * (0.9 + Math.random() * 0.4)),
-              range: Math.floor(base1.stats.range * (0.9 + Math.random() * 0.2)),
-              speed: parseFloat((base1.stats.speed * (0.95 + Math.random() * 0.1)).toFixed(2))
-          } 
-      };
-      
-      const opt2: Essence = { 
-          ...base2, 
-          id: `gen_${Date.now()}_2`, 
-          stats: { 
-              ...base2.stats, 
-              damage: Math.floor(base2.stats.damage * (0.9 + Math.random() * 0.4)),
-              range: Math.floor(base2.stats.range * (0.9 + Math.random() * 0.2)),
-              speed: parseFloat((base2.stats.speed * (0.95 + Math.random() * 0.1)).toFixed(2))
-          } 
-      };
-      
-      setPendingOptions([opt1, opt2]);
-      setGameStatus(GameStatus.ESSENCE_SELECTION);
-  };
-
-  const handleLevelComplete = useCallback((success: boolean) => {
-    // If in RIFT mode, handle win/loss specifically without autorestarting
-    // We cannot reliably access gameStatus state in this callback if it's stale, 
-    // but the engine calls this correctly.
-    
-    // Note: We need to check if we are currently in RIFT mode. 
-    // Since we can't easily access the fresh `gameStatus` here inside the closure without deps,
-    // we rely on the component that calls this.
-    
-    if (success) {
-        // RECALCULATE REWARD ONE FINAL TIME FOR INVENTORY UPDATE
-        // Using ref to get the absolute latest state
-        const currentQuests = questsRef.current;
-        const sideQuestsDone = currentQuests
-            .filter(q => q.type !== 'CATCH_GHOST')
-            .every(q => q.progress >= q.target);
-        
-        let reward = 0;
-        if (sideQuestsDone) {
-            const questRewards = currentQuests.reduce((acc, q) => acc + q.reward, 0);
-            const levelBonus = 30 + (levelConfig.levelNumber * 2);
-            reward = questRewards + levelBonus;
-            setScore(prev => prev + POINTS_PER_GHOST);
+const App: React.FC = () => {
+    // STATE
+    const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.SPLASH);
+    const [assets, setAssets] = useState<AssetMap>(DEFAULT_ASSETS);
+    const [metaState, setMetaState] = useState<MetaState>(() => {
+        try {
+            const saved = localStorage.getItem('alara_meta');
+            return saved ? JSON.parse(saved) : { ectoplasm: 0, inventory: [], unlockedRecipes: [] };
+        } catch (e) {
+            return { ectoplasm: 0, inventory: [], unlockedRecipes: [] };
         }
-        
-        const newSpirit: CapturedSpirit = {
-            id: `spirit-${Date.now()}`,
-            tier: Math.random() > 0.8 ? 2 : 1, 
-            name: caughtSpiritName, // This might be stale if not updated, but it's set in handleGhostCaught
-            powerValue: 10 + Math.floor(Math.random() * 10),
-            dateCaught: Date.now()
-        };
+    });
+    
+    // GAME CONFIG STATE
+    const [levelConfig, setLevelConfig] = useState<LevelConfig>(INITIAL_LEVEL_CONFIG);
+    const [currentEssence, setCurrentEssence] = useState<Essence>(CLASS_CONFIGS.SCIENTIST);
+    const [quests, setQuests] = useState<Quest[]>([]);
+    
+    // STATS
+    const [gameStats, setGameStats] = useState<GameStats>({
+        ghostHealth: 3000, maxGhostHealth: 3000, compassAngle: 0, timeRemaining: 60, totalTime: 60, isCapturing: false
+    });
+    const [generalStats, setGeneralStats] = useState<GeneralStats>({
+        catcherPower: 100, essencePower: 100, dropChance: 10, dimensionRift: 5
+    });
+    
+    // UI FLAGS
+    const [showAssetManager, setShowAssetManager] = useState(false);
+    const [tutorialStep, setTutorialStep] = useState(0);
+    const [loadingProgress, setLoadingProgress] = useState(0);
+    const [caughtSpiritName, setCaughtSpiritName] = useState("Unknown Spirit");
+    const [essenceOptions, setEssenceOptions] = useState<[Essence, Essence] | null>(null);
 
-        // Consolidated update for atomicity
-        setMetaState(prev => ({ 
-            ...prev, 
-            ectoplasm: prev.ectoplasm + reward,
-            inventory: [...prev.inventory, newSpirit] 
+    // RIFT STATE
+    const [riftStats, setRiftStats] = useState({ time: 0, captured: 0, totalTime: 60 });
+
+    // REFS
+    const gameEngineRef = useRef<GameEngineHandle>(null);
+
+    // Initial Load & Splash Logic
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setGameStatus(GameStatus.MENU);
+            if (!localStorage.getItem('alara_tutorial_done')) {
+                setTutorialStep(1);
+            }
+        }, 3000);
+        return () => clearTimeout(timer);
+    }, []);
+
+    // Persist Meta State
+    useEffect(() => {
+        localStorage.setItem('alara_meta', JSON.stringify(metaState));
+    }, [metaState]);
+
+    // Helpers
+    const generateQuests = (level: number): Quest[] => {
+        return [
+            { id: 'q1', type: 'CATCH_GHOST', target: 1, progress: 0, completed: false, description: "Capture the Spirit", reward: 50 + level * 10 },
+            { id: 'q2', type: 'KILL_COUNT', target: 3 + Math.floor(level/2), progress: 0, completed: false, description: "Banish Minions", reward: 30 + level * 5 },
+            { id: 'q3', type: 'COLLECT_ECTO', target: 5 + level, progress: 0, completed: false, description: "Collect Ectoplasm", reward: 20 + level * 5 }
+        ];
+    };
+
+    const startGame = () => {
+        setGameStatus(GameStatus.LOADING);
+        setLoadingProgress(0);
+        
+        // Setup Level
+        const newLevelConfig = { ...levelConfig }; 
+        // Pick random theme that isn't DIMENSION
+        const validThemes = THEMES.filter(t => t.type !== 'DIMENSION');
+        newLevelConfig.theme = validThemes[Math.floor(Math.random() * validThemes.length)];
+        setLevelConfig(newLevelConfig);
+        setQuests(generateQuests(newLevelConfig.levelNumber));
+
+        // Simulate Loading
+        const interval = setInterval(() => {
+            setLoadingProgress(prev => {
+                if (prev >= 100) {
+                    clearInterval(interval);
+                    setGameStatus(GameStatus.PLAYING);
+                    if (tutorialStep === 1) setTutorialStep(0); 
+                    return 100;
+                }
+                return prev + 5;
+            });
+        }, 50);
+    };
+
+    const handleLevelComplete = (success: boolean) => {
+        if (success) {
+            setCaughtSpiritName("Volatile Spirit");
+            // Generate options based on randomness
+            const keys = Object.keys(CLASS_CONFIGS) as ClassType[];
+            const opt1 = CLASS_CONFIGS[keys[Math.floor(Math.random() * keys.length)]];
+            const opt2 = CLASS_CONFIGS[keys[Math.floor(Math.random() * keys.length)]];
+            setEssenceOptions([opt1, opt2]);
+            setGameStatus(GameStatus.ESSENCE_SELECTION);
+        } else {
+            // Failed, return to workshop
+            setGameStatus(GameStatus.WORKSHOP);
+        }
+    };
+
+    const handleEssenceSelect = (newEssence: Essence) => {
+        setCurrentEssence(newEssence);
+        
+        // Calculate total rewards
+        const totalReward = quests.reduce((acc, q) => acc + (q.completed ? q.reward : 0), 0) + 100;
+        
+        setMetaState(prev => ({
+             ...prev,
+             ectoplasm: prev.ectoplasm + totalReward,
+             inventory: [...prev.inventory, { 
+                 id: Date.now().toString(), 
+                 tier: 1, 
+                 name: caughtSpiritName, 
+                 powerValue: 50, 
+                 dateCaught: Date.now() 
+             }]
         }));
         
-        startLevelLoad();
-    } else {
-        startLevelLoad();
-    }
-  }, [caughtSpiritName, levelConfig.levelNumber, startLevelLoad]); // Added dependencies
+        // Advance Level
+        setLevelConfig(prev => ({
+            ...prev,
+            levelNumber: prev.levelNumber + 1,
+            monsterCount: Math.min(20, prev.monsterCount + 1)
+        }));
+        
+        setGameStatus(GameStatus.WORKSHOP);
+    };
 
-  const handleEssenceChoice = (selectedEssence: Essence) => {
-      setCurrentEssence(selectedEssence);
-      if (engineRef.current) {
-          engineRef.current.triggerTransformation();
-          engineRef.current.triggerLevelTransition(); 
-      }
-      setGameStatus(GameStatus.PLAYING);
-  };
-
-  const handleStatsUpdate = useCallback((newStats: GameStats) => setStats(newStats), []);
-  const handleRiftStatsUpdate = useCallback((stats: { time: number, captured: number }) => {
-      setStats(prev => ({ ...prev, timeRemaining: stats.time }));
-      setRiftCapturedCount(stats.captured);
-  }, []);
-  
-  // Wrap level completion for Rift to handle specific state
-  const handleRiftComplete = useCallback((success: boolean) => {
-      setMessage(null); 
-      if (!success) {
-          setRiftWinState('LOSS');
-      } else {
-          setRiftWinState('WIN'); 
-      }
-  }, []);
-
-  const onWorkshopClick = () => {
-      if (engineRef.current) engineRef.current.triggerWorkshopTransition();
-  };
-
-  const onWorkshopOpenedCallback = () => {
-      setGameStatus(GameStatus.WORKSHOP);
-  };
-
-  const handleEnterRift = useCallback(() => {
-      setGameStatus(GameStatus.RIFT_INTRO);
-      setLoadingProgress(0);
-      setRiftCapturedCount(0); 
-      setRiftWinState(null);
-      setMessage(null);
-      
-      const players = Math.random() > 0.5 ? 2 : 3;
-      const target = players === 2 ? 12 : 20;
-      setRiftConfig({ players, target });
-      
-      let prog = 0;
-      if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
-      loadingIntervalRef.current = setInterval(() => {
-          prog += 1;
-          setLoadingProgress(prog);
-          if (prog >= 100) {
-              if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
-              loadingIntervalRef.current = null;
-              setGameStatus(GameStatus.RIFT);
-          }
-      }, 50); 
-  }, []);
-
-  const handleClaimRiftReward = () => {
-      const riftSpirit: CapturedSpirit = { id: `rift-spirit-${Date.now()}`, tier: 3, name: "Void Wraith", powerValue: 70, dateCaught: Date.now() };
-      setMetaState(prev => ({ ...prev, ectoplasm: prev.ectoplasm + 200, inventory: [...prev.inventory, riftSpirit] }));
-      setRiftWinState(null);
-      startLevelLoad();
-  };
-
-  const RiftWinModal = () => (
-      <div className="absolute inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-6 animate-in fade-in zoom-in duration-300 pointer-events-auto">
-          <h2 className="text-3xl font-gothic text-red-500 uppercase tracking-widest mb-2 drop-shadow-[0_0_15px_red] text-center">Dimension Stabilized</h2>
-          <div className="text-6xl mb-6">🔥</div>
-          <div className="bg-red-950/50 border border-red-500/50 p-6 rounded-2xl w-full max-w-xs flex flex-col items-center gap-4 mb-8">
-              <span className="text-red-200 uppercase text-xs tracking-[0.2em]">Reward</span>
-              <div className="flex items-center gap-3">
-                  <span className="text-4xl font-gothic text-white drop-shadow-[0_0_10px_red]">200</span>
-                  <EctoIcon className="w-8 h-8" />
-              </div>
-          </div>
-          <button onClick={handleClaimRiftReward} className="w-full max-w-xs bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-xl shadow-[0_0_20px_red] uppercase tracking-widest text-sm transition-all active:scale-95">Claim Reward</button>
-      </div>
-  );
-
-  const RiftLoseModal = () => (
-      <div className="absolute inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-6 animate-in fade-in zoom-in duration-300 pointer-events-auto">
-          <h2 className="text-2xl font-gothic text-slate-300 uppercase tracking-widest mb-2 text-center">Dimension Collapsed</h2>
-          <p className="text-xs text-slate-400 text-center max-w-[250px] mb-6 leading-relaxed">
-              The instability was too great. Search for <span className="text-[#a855f7] font-bold">Ancient Shrines</span> in other realms to attempt the stabilization again.
-          </p>
-          <button onClick={startLevelLoad} className="w-full max-w-xs bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-xl border border-slate-600 uppercase tracking-widest text-sm transition-all active:scale-95 hover:border-white/20 z-50 cursor-pointer">Return to Hunt</button>
-      </div>
-  );
-
-  return (
-    <div className="min-h-screen bg-[#020617] flex items-center justify-center font-sans select-none overflow-hidden">
-        {/* Main Game Container - Fixed Aspect Ratio */}
-        <div className="w-full h-[100dvh] md:max-w-[45vh] md:h-auto md:max-h-[85vh] md:aspect-[9/16] bg-[#0f172a] flex flex-col relative shadow-[0_0_60px_black] border-x border-[#1e293b]">
-            {gameStatus !== GameStatus.LOADING && gameStatus !== GameStatus.RIFT_INTRO && gameStatus !== GameStatus.WORKSHOP && gameStatus !== GameStatus.SPLASH && !showSplash &&
-              <TopHUD 
-                score={score} 
-                ectoplasm={metaState.ectoplasm} 
-                levelConfig={levelConfig} 
-                onWorkshopClick={onWorkshopClick}
-                assets={assets}
-                quests={quests}
-                isRift={gameStatus === GameStatus.RIFT}
-                riftCaptured={riftCapturedCount}
-                riftTarget={riftConfig.target}
-              />
+    const handleQuestProgress = (type: QuestType, amount: number = 1) => {
+        setQuests(prev => prev.map(q => {
+            if (q.type === type && !q.completed) {
+                const newProgress = Math.min(q.target, q.progress + amount);
+                return { ...q, progress: newProgress, completed: newProgress >= q.target };
             }
-            
-            {message && !riftWinState && gameStatus !== GameStatus.ESSENCE_SELECTION && gameStatus !== GameStatus.SPLASH && (
-              <div className="absolute top-24 left-0 right-0 text-center z-[300] pointer-events-none flex justify-center">
-                  <span className={`inline-flex items-center gap-2 text-xs font-gothic text-[#f0f9ff] px-6 py-2 shadow-[0_0_20px] uppercase tracking-[0.2em] rounded-full border border-white/20 animate-bounce backdrop-blur-md ${gameStatus === GameStatus.RIFT ? 'bg-red-900/90 shadow-red-500' : 'bg-[#a855f7]/90 shadow-[#a855f7]'}`}>
-                      {message.icon && <span className="text-base">{message.icon}</span>}
-                      {message.text}
-                  </span>
-              </div>
-            )}
-            
-            {tutorialStep > 0 && <TutorialOverlay step={tutorialStep} onNext={handleNextTutorial} onDismiss={handleDismissTutorial} />}
+            return q;
+        }));
+    };
 
-            {/* Canvas Container */}
-            <div className="flex-1 relative w-full h-full bg-[#0f172a] transition-all overflow-hidden">
-                {gameStatus === GameStatus.RIFT ? (
-                    <>
-                        {/* Using Memoized Rift Engine */}
-                        <MemoizedRiftEngine 
-                            onComplete={handleRiftComplete}
-                            showFloatingMessage={showFloatingMessage}
-                            currentEssence={currentEssence}
-                            onStatsUpdate={handleRiftStatsUpdate}
-                            targetScore={riftConfig.target}
-                            playerCount={riftConfig.players}
-                            assets={assets}
-                        />
-                        {riftWinState === 'WIN' && <RiftWinModal />}
-                        {riftWinState === 'LOSS' && <RiftLoseModal />}
-                    </>
-                ) : (
-                    // CRITICAL FIX: ALWAYS RENDER GAME ENGINE
-                    // This prevents the black screen issue caused by asset unloading.
-                    // Instead of conditional rendering, we rely on the LoadingScreen (z-1000) to cover it.
-                    <MemoizedGameEngine 
-                        ref={engineRef}
-                        gameStatus={gameStatus} 
-                        levelConfig={levelConfig}
-                        generalStats={generalStats}
-                        onStatsUpdate={handleStatsUpdate}
-                        onLevelComplete={handleLevelComplete}
-                        onGhostCaught={handleGhostCaught}
-                        onItemCollect={handleItemCollect}
-                        showFloatingMessage={showFloatingMessage}
-                        onWorkshopOpen={onWorkshopOpenedCallback} 
-                        onEnterRift={handleEnterRift}
-                        currentEssence={currentEssence}
-                        onQuestProgress={handleQuestProgress}
-                        assets={assets}
-                        paused={tutorialStep > 0 || gameStatus !== GameStatus.PLAYING}
-                    />
-                )}
-                
-                {showSplash && <SplashScreen assets={assets} isFading={splashFading} />}
-                
-                {/* Render LoadingScreen during SPLASH (behind) and LOADING to ensure smooth transition */}
-                {(gameStatus === GameStatus.LOADING || gameStatus === GameStatus.SPLASH) && (
-                    <LoadingScreen levelConfig={levelConfig} quests={quests} assets={assets} progress={loadingProgress} />
-                )}
-                
-                {gameStatus === GameStatus.RIFT_INTRO && <LoadingScreen isRift={true} levelConfig={levelConfig} quests={quests} assets={assets} progress={loadingProgress} riftConfig={riftConfig} />}
-                
-                {gameStatus === GameStatus.WORKSHOP && (
-                    <WorkshopScreen 
-                        metaState={metaState}
-                        onUpdateMeta={setMetaState}
-                        onExit={() => alert('Exit game')} 
-                        onPlay={startLevelLoad}
-                        assets={assets}
-                        onOpenAssetManager={() => setShowAssetManager(true)}
-                        showFloatingMessage={showFloatingMessage}
-                        currentEssence={currentEssence}
-                        generalStats={generalStats}
-                    />
-                )}
-                
-                {gameStatus === GameStatus.ESSENCE_SELECTION && 
-                  <EssenceSelectionScreen 
-                    options={pendingOptions} 
-                    onSelect={handleEssenceChoice} 
-                    assets={assets} 
-                    caughtSpiritName={caughtSpiritName}
-                    currentEssence={currentEssence}
-                    quests={quests}
-                    levelNumber={levelConfig.levelNumber}
-                  />
-                }
-                
-                {showAssetManager && (
-                    <AssetManager 
-                        currentAssets={assets} 
-                        onSaveAssets={handleUpdateAssets} 
-                        onClose={() => setShowAssetManager(false)} 
-                    />
-                )}
-            </div>
-            
-            {gameStatus !== GameStatus.LOADING && 
-             gameStatus !== GameStatus.RIFT_INTRO &&
-             gameStatus !== GameStatus.WORKSHOP && 
-             !showSplash &&
-             <BottomPanel stats={stats} levelConfig={levelConfig} isRift={gameStatus === GameStatus.RIFT} />
-            }
-        </div>
-    </div>
-  );
-}
+    const handleRiftComplete = (success: boolean) => {
+        if (success) {
+            setMetaState(prev => ({
