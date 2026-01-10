@@ -3,7 +3,6 @@
 @tailwind utilities;
 
 html {
-  height: -webkit-fill-available;
   background-color: #0f172a;
 }
 
@@ -12,14 +11,13 @@ body {
   padding: 0;
   overflow: hidden;
   background-color: #0f172a;
-  width: 100vw;
-  /* CRITICAL: Use -webkit-fill-available for iOS to respect safe areas correctly */
-  min-height: 100vh;
-  min-height: -webkit-fill-available;
+  width: 100%;
+  height: 100%;
   position: fixed;
   top: 0;
   left: 0;
   overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 #root {
