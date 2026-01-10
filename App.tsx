@@ -115,7 +115,7 @@ const SplashScreen = ({ assets, isFading }: { assets: AssetMap, isFading: boolea
             />
             {/* VERSION INDICATOR */}
             <div className="absolute bottom-12 left-0 right-0 text-center z-10 pointer-events-none">
-                <span className="text-[10px] font-mono text-purple-300/40 tracking-[0.3em] uppercase">v1.4.3 FIXED INSET-0</span>
+                <span className="text-[10px] font-mono text-purple-300/40 tracking-[0.3em] uppercase">v1.4.5 ENV SAFE AREA FIX</span>
             </div>
         </div>
     );
@@ -408,9 +408,15 @@ const BottomPanel = ({ stats, levelConfig, isRift }: { stats: GameStats, levelCo
     const maxTime = stats.totalTime || (isRift ? 30 : levelConfig.timeLimit);
     const timePercentage = Math.max(0, Math.min(100, (stats.timeRemaining / maxTime) * 100));
 
+    // KEY FIX: Use env(safe-area-inset-bottom) to handle iPhone Home Bar vs Android correctly
+    // Android: env() is 0px -> bottom is 1rem (16px)
+    // iPhone: env() is ~34px -> bottom is 1rem + 34px (50px)
+    // This allows the panel to 'jump' over the home indicator on iOS but stay compact on Android.
     return (
-      // MODIFIED: Changed bottom-8 to bottom-10 to be extra safe from Home Indicator
-      <div className="absolute bottom-10 left-4 right-4 h-auto flex items-end justify-center z-20 pointer-events-none pb-[env(safe-area-inset-bottom)]">
+      <div 
+        className="absolute left-4 right-4 h-auto flex items-end justify-center z-20 pointer-events-none"
+        style={{ bottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
+      >
           <div className={`w-full backdrop-blur-md p-4 rounded-3xl border shadow-[0_0_30px_rgba(0,0,0,0.6)] flex items-center gap-4 ${isRift ? 'bg-[#0f172a]/60 border-white/10' : 'bg-[#0f172a]/60 border-white/10'}`}>
               <div className="flex-1 flex flex-col gap-3">
                   <div className="flex flex-col gap-1">
@@ -874,11 +880,17 @@ export default function App() {
   );
 
   return (
-    // CHANGED: Use fixed inset-0 to force fill entire viewport, solving the black bar issue
-    <div className="fixed inset-0 bg-[#0f172a] flex items-center justify-center font-sans select-none overflow-hidden touch-none">
+    // CHANGED: Use fixed top-0 left-0 and oversized background to eliminate the black bar
+    <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center font-sans select-none overflow-hidden touch-none">
+        
+        {/* THIS IS THE FIX: A background layer that extends strictly beyond the bottom edge */}
+        <div className="absolute top-0 left-0 right-0 bottom-[-200px] bg-[#0f172a] z-[-10]" />
+
         {/* Main Game Container - Fixed for Mobile, Aspect Ratio for Desktop */}
-        <div className="fixed inset-0 md:relative md:inset-auto md:w-auto md:h-auto md:max-w-[45vh] md:max-h-[85vh] md:aspect-[9/16] bg-[#0f172a] shadow-[0_0_60px_black] md:border-x border-[#1e293b]">
-            {/* CANVAS LAYER (ABSOLUTE BOTTOM) */}
+        {/* CHANGED: Use absolute inset-0 to force fill entire viewport, fixing canvas cutoff issues */}
+        <div className="absolute inset-0 md:relative md:inset-auto md:w-auto md:h-auto md:max-w-[45vh] md:max-h-[85vh] md:aspect-[9/16] bg-[#0f172a] shadow-[0_0_60px_black] md:border-x border-[#1e293b] flex flex-col">
+            
+            {/* CANVAS LAYER (ABSOLUTE FILL) */}
             <div className="absolute inset-0 z-0 w-full h-full bg-[#0f172a] transition-all overflow-hidden">
                 {gameStatus === GameStatus.RIFT ? (
                     <>
