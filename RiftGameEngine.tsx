@@ -509,7 +509,25 @@ export const RiftGameEngine = forwardRef<any, RiftEngineProps>(({ onComplete, sh
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
         
-        ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        // --- HIGH DPI SCALING ---
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        
+        if (canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+        }
+
+        const logicScale = canvas.width / CANVAS_WIDTH;
+        // Logic height for full screen coverage
+        const viewportHeightLogic = canvas.height / logicScale;
+
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.scale(logicScale, logicScale);
+        ctx.imageSmoothingEnabled = false; 
+        // ------------------------
 
         // Shake
         ctx.save();
@@ -525,11 +543,11 @@ export const RiftGameEngine = forwardRef<any, RiftEngineProps>(({ onComplete, sh
             const pattern = ctx.createPattern(bgImg, 'repeat');
             if (pattern) {
                 ctx.fillStyle = pattern;
-                ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+                ctx.fillRect(0, 0, CANVAS_WIDTH, viewportHeightLogic);
             }
         } else {
             ctx.fillStyle = '#0f172a';
-            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            ctx.fillRect(0, 0, CANVAS_WIDTH, viewportHeightLogic);
         }
 
         // Coil (Goal)
@@ -604,7 +622,7 @@ export const RiftGameEngine = forwardRef<any, RiftEngineProps>(({ onComplete, sh
         // Frozen overlay
         if (isFrozenRef.current) {
             ctx.fillStyle = 'rgba(0,0,0,0.4)';
-            ctx.fillRect(0,0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            ctx.fillRect(0,0, CANVAS_WIDTH, viewportHeightLogic);
         }
 
         ctx.restore(); // End shake
@@ -699,11 +717,8 @@ export const RiftGameEngine = forwardRef<any, RiftEngineProps>(({ onComplete, sh
     return (
         <canvas 
             ref={canvasRef}
-            width={CANVAS_WIDTH}
-            height={CANVAS_HEIGHT}
-            // CHANGED: Use w-full h-full object-cover to stretch and fill, removing all black bars
-            className="block w-full h-full object-cover touch-none"
-            style={{ imageRendering: 'pixelated' }}
+            // REMOVED FIXED WIDTH/HEIGHT
+            className="block w-full h-full object-cover touch-none pixelated"
         />
     );
 });
