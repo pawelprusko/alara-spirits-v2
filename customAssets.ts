@@ -1,3 +1,4 @@
+
 // ==========================================
 // MIEJSCE NA TWOJE GRAFIKI (BASE64)
 // ==========================================
@@ -15,3 +16,5 @@ export const CUSTOM_RECIPE_BOOK = "";
 export const CUSTOM_CRYSTAL = "";
 // WKLEJ TUTAJ SWÓJ SPLASH SCREEN:
 export const CUSTOM_SPLASH_SCREEN = "";
+// WKLEJ TUTAJ SWOJĄ IKONĘ APLIKACJI (512x512 PNG Base64):
+export const CUSTOM_APP_ICON = "";
