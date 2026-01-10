@@ -29,3 +29,11 @@ body {
   width: 100%;
   height: 100%;
 }
+
+/* UTILITY FOR SHARP PIXEL ART RENDERING */
+.pixelated {
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
