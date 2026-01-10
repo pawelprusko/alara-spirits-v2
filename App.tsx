@@ -115,7 +115,7 @@ const SplashScreen = ({ assets, isFading }: { assets: AssetMap, isFading: boolea
             />
             {/* VERSION INDICATOR */}
             <div className="absolute bottom-12 left-0 right-0 text-center z-10 pointer-events-none">
-                <span className="text-[10px] font-mono text-purple-300/40 tracking-[0.3em] uppercase">v1.3.9 SCROLL FIX</span>
+                <span className="text-[10px] font-mono text-purple-300/40 tracking-[0.3em] uppercase">v1.4.1 H-SCREEN FIX</span>
             </div>
         </div>
     );
@@ -409,6 +409,7 @@ const BottomPanel = ({ stats, levelConfig, isRift }: { stats: GameStats, levelCo
     const timePercentage = Math.max(0, Math.min(100, (stats.timeRemaining / maxTime) * 100));
 
     return (
+      // MODIFIED: Changed bottom-6 to bottom-8 + extra safety padding to avoid Home Indicator overlay
       <div className="absolute bottom-8 left-4 right-4 h-auto flex items-end justify-center z-20 pointer-events-none pb-[env(safe-area-inset-bottom)]">
           <div className={`w-full backdrop-blur-md p-4 rounded-3xl border shadow-[0_0_30px_rgba(0,0,0,0.6)] flex items-center gap-4 ${isRift ? 'bg-[#0f172a]/60 border-white/10' : 'bg-[#0f172a]/60 border-white/10'}`}>
               <div className="flex-1 flex flex-col gap-3">
@@ -873,9 +874,10 @@ export default function App() {
   );
 
   return (
-    <div className="fixed inset-0 w-full h-full bg-[#020617] flex items-center justify-center font-sans select-none overflow-hidden touch-none">
+    // CHANGED: Use w-screen h-screen with fixed positioning to ignore safe area margins
+    <div className="fixed top-0 left-0 w-screen h-screen bg-[#0f172a] flex items-center justify-center font-sans select-none overflow-hidden touch-none">
         {/* Main Game Container - Fixed for Mobile, Aspect Ratio for Desktop */}
-        <div className="fixed inset-0 w-full h-full md:relative md:inset-auto md:w-auto md:h-auto md:max-w-[45vh] md:max-h-[85vh] md:aspect-[9/16] bg-[#0f172a] shadow-[0_0_60px_black] md:border-x border-[#1e293b]">
+        <div className="fixed top-0 left-0 w-screen h-screen md:relative md:inset-auto md:w-auto md:h-auto md:max-w-[45vh] md:max-h-[85vh] md:aspect-[9/16] bg-[#0f172a] shadow-[0_0_60px_black] md:border-x border-[#1e293b]">
             {/* CANVAS LAYER (ABSOLUTE BOTTOM) */}
             <div className="absolute inset-0 z-0 w-full h-full bg-[#0f172a] transition-all overflow-hidden">
                 {gameStatus === GameStatus.RIFT ? (
