@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { GameEngine } from './GameEngine';
 import { WorkshopScreen } from './WorkshopScreen';
@@ -477,6 +478,53 @@ export default function App() {
           } catch (e) { console.error("Failed to load custom assets", e); }
       }
   }, []);
+
+  // --- DYNAMIC APP ICON & MANIFEST UPDATE ---
+  useEffect(() => {
+      const iconUrl = assets['app_icon'];
+      if (!iconUrl) return;
+
+      // 1. Update Favicon
+      const linkIcon = document.querySelector("link[rel='icon']") as HTMLLinkElement;
+      if (linkIcon) linkIcon.href = iconUrl;
+
+      // 2. Update Apple Touch Icon (iOS)
+      const linkApple = document.querySelector("link[rel='apple-touch-icon']") as HTMLLinkElement;
+      if (linkApple) linkApple.href = iconUrl;
+
+      // 3. Update Manifest (Android PWA)
+      const linkManifest = document.querySelector("link[rel='manifest']") as HTMLLinkElement;
+      if (linkManifest) {
+          const dynamicManifest = {
+              name: "Alara Spirits",
+              short_name: "Alara",
+              start_url: "/",
+              scope: "/",
+              display: "standalone",
+              background_color: "#0f172a",
+              theme_color: "#0f172a",
+              orientation: "portrait",
+              icons: [
+                  {
+                      src: iconUrl,
+                      sizes: "192x192",
+                      type: "image/png", 
+                      purpose: "any maskable"
+                  },
+                  {
+                      src: iconUrl,
+                      sizes: "512x512",
+                      type: "image/png",
+                      purpose: "any maskable"
+                  }
+              ]
+          };
+          const stringManifest = JSON.stringify(dynamicManifest);
+          const blob = new Blob([stringManifest], {type: 'application/json'});
+          const manifestURL = URL.createObjectURL(blob);
+          linkManifest.href = manifestURL;
+      }
+  }, [assets]); // Updates whenever assets change (initially or via AssetManager)
 
   const handleUpdateAssets = (newAssets: AssetMap) => {
       const customs: AssetMap = {};
