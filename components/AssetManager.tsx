@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Upload, Save, Trash2, Check, Copy } from 'lucide-react';
 import { AssetMap } from '../types';
@@ -16,6 +17,8 @@ const MANAGED_ASSETS = [
     { key: 'portal_gate', label: 'Main Portal', codeKey: 'CUSTOM_PORTAL' },
     { key: 'book_lectern', label: 'Recipe Book', codeKey: 'CUSTOM_RECIPE_BOOK' },
     { key: 'crystal_large', label: 'Synthesis Crystal', codeKey: 'CUSTOM_CRYSTAL' },
+    { key: 'splash_screen', label: 'Splash Screen', codeKey: 'CUSTOM_SPLASH_SCREEN' },
+    { key: 'app_icon', label: 'App Icon (512px)', codeKey: 'CUSTOM_APP_ICON' },
 ];
 
 export const AssetManager: React.FC<AssetManagerProps> = ({ currentAssets, onSaveAssets, onClose }) => {
