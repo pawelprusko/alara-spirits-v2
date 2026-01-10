@@ -573,6 +573,24 @@ export default function App() {
       inventory: [], 
       unlockedRecipes: [] 
   });
+
+  // --- PERSIST META STATE TO LOCAL STORAGE ---
+  // Load state on mount
+  useEffect(() => {
+      const savedMeta = localStorage.getItem('alara_meta_state');
+      if (savedMeta) {
+          try {
+              setMetaState(JSON.parse(savedMeta));
+          } catch (e) {
+              console.error("Failed to load meta state", e);
+          }
+      }
+  }, []);
+
+  // Save state on change
+  useEffect(() => {
+      localStorage.setItem('alara_meta_state', JSON.stringify(metaState));
+  }, [metaState]);
   
   const [quests, setQuests] = useState<Quest[]>([]);
   // Use Ref to track quests for fresh access in callbacks
@@ -614,6 +632,9 @@ export default function App() {
   }, []);
 
   const handleItemCollect = useCallback(() => {
+     // CRITICAL FIX: Add Currency Immediately on pickup
+     setMetaState(prev => ({ ...prev, ectoplasm: prev.ectoplasm + 5 }));
+
      // 50% chance for CLASS BOOST, 50% chance for MASTERY BOOST
      const roll = Math.random();
      
