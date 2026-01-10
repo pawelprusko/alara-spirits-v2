@@ -397,10 +397,15 @@ export const GameEngine = forwardRef<GameEngineHandle, GameEngineProps>(({
       
       if (shrineRef.current && shrineRef.current.active && canvasRef.current) {
           const rect = canvasRef.current.getBoundingClientRect();
+          // ADJUSTED FOR RESPONSIVE SCALE
           const scaleX = CANVAS_WIDTH / rect.width;
-          const scaleY = CANVAS_HEIGHT / rect.height;
+          const scaleY = (canvasRef.current.height / window.devicePixelRatio) / rect.height; // Use logic height if possible, but map is dynamic vertically.
+          // Fallback to simple mapping since camera handles world coords.
+          
+          // Re-calculate X based on fixed width logic
           const x = (clientX - rect.left) * scaleX;
-          const y = (clientY - rect.top) * scaleY;
+          // Calculate Y based on equivalent logic scale
+          const y = (clientY - rect.top) * scaleX; 
           
           const s = shrineRef.current;
           const sx = s.pos.x - cameraRef.current.x;
@@ -901,11 +906,12 @@ export const GameEngine = forwardRef<GameEngineHandle, GameEngineProps>(({
 
     if (isPointerDownRef.current && pointerScreenPosRef.current && canvasRef.current) {
         const rect = canvasRef.current.getBoundingClientRect();
+        // RESPONSIVE COORDINATE MAPPING
         const scaleX = CANVAS_WIDTH / rect.width;
-        const scaleY = CANVAS_HEIGHT / rect.height;
+        // const scaleY = CANVAS_HEIGHT / rect.height; // Not used for X logic
 
         const x = (pointerScreenPosRef.current.x - rect.left) * scaleX;
-        const y = (pointerScreenPosRef.current.y - rect.top) * scaleY;
+        const y = (pointerScreenPosRef.current.y - rect.top) * scaleX; // Uniform scaling based on width
         
         const worldX = cameraRef.current.x + x;
         const worldY = cameraRef.current.y + y;
@@ -1360,7 +1366,29 @@ export const GameEngine = forwardRef<GameEngineHandle, GameEngineProps>(({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    // --- HIGH DPI & RESPONSIVE SCALING ---
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    
+    // Resize buffer if mismatch
+    if (canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+    }
+
+    // Logic unit: 360px width.
+    // Calculate uniform scale to fit logic width into physical width
+    const logicScale = canvas.width / CANVAS_WIDTH;
+    const viewportHeightLogic = canvas.height / logicScale;
+
+    // Reset transform & Clear
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Apply Logic Scale
+    ctx.scale(logicScale, logicScale);
+    ctx.imageSmoothingEnabled = false; // PIXEL ART RENDER
+    // -------------------------------------
 
     const shakeX = Math.sin(timestamp * 0.5) * shakeIntensityRef.current;
     const shakeY = Math.cos(timestamp * 0.45) * shakeIntensityRef.current;
@@ -1387,14 +1415,15 @@ export const GameEngine = forwardRef<GameEngineHandle, GameEngineProps>(({
 
     ctx.save();
     ctx.beginPath();
-    ctx.rect(0, HORIZON_Y, CANVAS_WIDTH, CANVAS_HEIGHT - HORIZON_Y);
+    // Fill down to dynamic viewport height, not just 932
+    ctx.rect(0, HORIZON_Y, CANVAS_WIDTH, viewportHeightLogic - HORIZON_Y);
     ctx.clip(); 
     
     let groundColor = levelConfig.theme.groundColor;
     let patternKey = levelConfig.theme.groundPatternKey;
 
     ctx.fillStyle = groundColor;
-    ctx.fillRect(0, HORIZON_Y, CANVAS_WIDTH, CANVAS_HEIGHT - HORIZON_Y);
+    ctx.fillRect(0, HORIZON_Y, CANVAS_WIDTH, viewportHeightLogic - HORIZON_Y);
 
     const bgImg = assetsRef.current[patternKey];
     if (bgImg) {
@@ -1402,7 +1431,8 @@ export const GameEngine = forwardRef<GameEngineHandle, GameEngineProps>(({
         const ptrn = ctx.createPattern(bgImg, 'repeat');
         if (ptrn) { 
             ctx.fillStyle = ptrn; 
-            ctx.fillRect(cx, cy + HORIZON_Y, CANVAS_WIDTH, CANVAS_HEIGHT); 
+            // Draw way oversized to ensure coverage on any screen ratio
+            ctx.fillRect(cx, cy + HORIZON_Y, CANVAS_WIDTH, viewportHeightLogic + 200); 
             ctx.fillRect(0, 0, MAP_WIDTH, MAP_HEIGHT); 
         }
         ctx.translate(cx, cy);
@@ -1452,8 +1482,11 @@ export const GameEngine = forwardRef<GameEngineHandle, GameEngineProps>(({
         const distFromHorizon = screenY - HORIZON_Y;
         const feetScreenY = (entity.pos.y + entity.size.height) - cy;
         if (feetScreenY < HORIZON_Y + 10) return; 
-        if (screenY > CANVAS_HEIGHT + 100) return;
+        
+        // Use dynamic viewport height for culling
+        if (screenY > viewportHeightLogic + 100) return;
 
+        // Use standard logic height for scaling factor to keep consistent perspective feel
         const playableHeight = CANVAS_HEIGHT - HORIZON_Y;
         const factor = Math.min(1, Math.max(0, distFromHorizon / playableHeight));
         
@@ -1825,14 +1858,16 @@ export const GameEngine = forwardRef<GameEngineHandle, GameEngineProps>(({
         const flashAlpha = 1 - Math.min(1, transitionRef.current.timer / 300);
         if (flashAlpha > 0) {
             ctx.fillStyle = `rgba(255, 255, 255, ${flashAlpha * 0.4})`;
-            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            // Use full canvas size for flash
+            ctx.fillRect(0, 0, CANVAS_WIDTH, viewportHeightLogic);
         }
     }
     
     if (shakeIntensityRef.current > 0) {
         const darkAlpha = Math.min(0.7, shakeIntensityRef.current * 0.1);
         ctx.fillStyle = `rgba(0,0,0,${darkAlpha})`;
-        ctx.fillRect(-100, -100, CANVAS_WIDTH + 200, CANVAS_HEIGHT + 200);
+        // Use full canvas size for shake overlay
+        ctx.fillRect(-100, -100, CANVAS_WIDTH + 200, viewportHeightLogic + 200);
     }
 
     floatingTextsRef.current.forEach(ft => {
@@ -1862,10 +1897,8 @@ export const GameEngine = forwardRef<GameEngineHandle, GameEngineProps>(({
   return (
     <canvas 
         ref={canvasRef} 
-        width={CANVAS_WIDTH} 
-        height={CANVAS_HEIGHT}
-        className="block w-full h-full object-cover touch-none"
-        style={{ imageRendering: 'pixelated' }}
+        // REMOVED FIXED WIDTH/HEIGHT
+        className="block w-full h-full object-cover touch-none pixelated"
     />
   );
 });
