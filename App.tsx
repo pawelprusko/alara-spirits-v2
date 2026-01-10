@@ -497,7 +497,7 @@ export default function App() {
       if (linkManifest) {
           const dynamicManifest = {
               name: "Alara Spirits",
-              short_name: "Alara",
+              short_name: "Alara Spirits",
               start_url: "/",
               scope: "/",
               display: "standalone",
