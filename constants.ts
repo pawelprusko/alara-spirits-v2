@@ -8,7 +8,8 @@ import {
     CUSTOM_PORTAL, 
     CUSTOM_RECIPE_BOOK, 
     CUSTOM_CRYSTAL,
-    CUSTOM_SPLASH_SCREEN
+    CUSTOM_SPLASH_SCREEN,
+    CUSTOM_APP_ICON
 } from './customAssets';
 
 export const CANVAS_WIDTH = 360;
@@ -159,6 +160,8 @@ const POSTER_RANK_SVG = `<svg width="100" height="140" viewBox="0 0 100 140" xml
 
 const SPLASH_SCREEN_DEFAULT = `<svg width="360" height="640" viewBox="0 0 360 640" xmlns="http://www.w3.org/2000/svg"><rect width="360" height="640" fill="#020617"/><text x="180" y="280" font-family="serif" font-weight="bold" font-size="40" text-anchor="middle" fill="#a855f7" stroke="#fff" stroke-width="1">ALARA</text><text x="180" y="330" font-family="serif" font-size="30" text-anchor="middle" fill="#d8b4fe" letter-spacing="5">SPIRITS</text><circle cx="180" cy="400" r="20" fill="none" stroke="#a855f7" stroke-width="2"><animate attributeName="r" values="20;30;20" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;0;1" dur="2s" repeatCount="indefinite"/></circle></svg>`;
 
+const APP_ICON_DEFAULT = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiI+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIGZpbGw9IiMwZjE3MmEiIHJ4PSIxMDAiLz48cGF0aCBkPSJNMjU2IDgwIEMxMDAgODAgODAgMjU2IDgwIDQzMiBMMTYwIDQwMCBMMjU2IDQ0MCBMMzUyIDQwMCBMNDMyIDQzMiBDNDMyIDI1NiA0MTIgODAgMjU2IDgwIFoiIGZpbGw9IiNkOGI0ZmUiLz48Y2lyY2xlIGN4PSIyMDAiIGN5PSIyMjAiIHI9IjMwIiBmaWxsPSIjMWUyOTNiIi8+PGNpcmNsZSBjeD0iMzEyIiBjeT0iMjIwIiByPSIzMCIgZmlsbD0iIzFlMjkzYiIvPjwvc3ZnPg==`;
+
 // ==========================================
 // 3. CONFIG EXPORTS
 // ==========================================
@@ -226,6 +229,7 @@ export const DEFAULT_ASSETS: Record<string, string> = {
     poster_rank: CUSTOM_RANKING_POSTER || svgToDataUri(POSTER_RANK_SVG),
     
     splash_screen: CUSTOM_SPLASH_SCREEN || svgToDataUri(SPLASH_SCREEN_DEFAULT),
+    app_icon: CUSTOM_APP_ICON || APP_ICON_DEFAULT,
 
     // Game loop fallbacks
     crystal: svgToDataUri(CRYSTAL_LARGE_SVG), 
