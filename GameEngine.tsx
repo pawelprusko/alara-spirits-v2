@@ -235,7 +235,8 @@ export const GameEngine = forwardRef<GameEngineHandle, GameEngineProps>(({
     playerRef.current.pos = { ...playerStartPos }; 
     playerRef.current.vel = { x: 0, y: 0 }; 
     
-    const idealCamY = playerRef.current.pos.y - (CANVAS_HEIGHT * 0.6);
+    // FIX: Adjusted camera offset factor from 0.6 to 0.45 to position player higher on screen
+    const idealCamY = playerRef.current.pos.y - (CANVAS_HEIGHT * 0.45);
     cameraRef.current.x = Math.max(0, Math.min(MAP_WIDTH - CANVAS_WIDTH, playerRef.current.pos.x - CANVAS_WIDTH / 2 + 50));
     cameraRef.current.y = Math.max(0, Math.min(MAP_HEIGHT - CANVAS_HEIGHT, idealCamY));
 
@@ -991,7 +992,7 @@ export const GameEngine = forwardRef<GameEngineHandle, GameEngineProps>(({
     }
     // ---------------------------------
 
-    const idealCamY = playerRef.current.pos.y - (CANVAS_HEIGHT * 0.6);
+    const idealCamY = playerRef.current.pos.y - (CANVAS_HEIGHT * 0.45);
     cameraRef.current.x += (Math.max(0, Math.min(MAP_WIDTH - CANVAS_WIDTH, playerRef.current.pos.x - CANVAS_WIDTH / 2 + 50)) - cameraRef.current.x) * 0.15;
     cameraRef.current.y += (Math.max(0, Math.min(MAP_HEIGHT - CANVAS_HEIGHT, idealCamY)) - cameraRef.current.y) * 0.15;
 
