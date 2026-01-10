@@ -2,17 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body {
+html {
+  height: -webkit-fill-available;
+  background-color: #0f172a;
+}
+
+body {
   margin: 0;
   padding: 0;
   overflow: hidden;
   background-color: #0f172a;
   width: 100vw;
-  height: 100%; /* Reverted to 100% for stability, App.tsx will handle the stretch */
-  position: fixed; /* Keeps the app locked to viewport */
+  /* CRITICAL: Use -webkit-fill-available for iOS to respect safe areas correctly */
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  position: fixed;
   top: 0;
   left: 0;
-  overscroll-behavior: none; /* This prevents the rubber-band effect/black bar reveal */
+  overscroll-behavior: none;
 }
 
 #root {
