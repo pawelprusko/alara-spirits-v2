@@ -115,7 +115,7 @@ const SplashScreen = ({ assets, isFading }: { assets: AssetMap, isFading: boolea
             />
             {/* VERSION INDICATOR */}
             <div className="absolute bottom-12 left-0 right-0 text-center z-10 pointer-events-none">
-                <span className="text-[10px] font-mono text-purple-300/40 tracking-[0.3em] uppercase">v1.4.6 FINAL DVH FIX</span>
+                <span className="text-[10px] font-mono text-purple-300/40 tracking-[0.3em] uppercase">v1.4.7 UI TWEAK</span>
             </div>
         </div>
     );
@@ -415,7 +415,7 @@ const BottomPanel = ({ stats, levelConfig, isRift }: { stats: GameStats, levelCo
     return (
       <div 
         className="absolute left-4 right-4 h-auto flex items-end justify-center z-20 pointer-events-none"
-        style={{ bottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
+        style={{ bottom: '10px' }}
       >
           <div className={`w-full backdrop-blur-md p-4 rounded-3xl border shadow-[0_0_30px_rgba(0,0,0,0.6)] flex items-center gap-4 ${isRift ? 'bg-[#0f172a]/60 border-white/10' : 'bg-[#0f172a]/60 border-white/10'}`}>
               <div className="flex-1 flex flex-col gap-3">
