@@ -115,7 +115,7 @@ const SplashScreen = ({ assets, isFading }: { assets: AssetMap, isFading: boolea
             />
             {/* VERSION INDICATOR */}
             <div className="absolute bottom-12 left-0 right-0 text-center z-10 pointer-events-none">
-                <span className="text-[10px] font-mono text-purple-300/40 tracking-[0.3em] uppercase">v1.4.5 ENV SAFE AREA FIX</span>
+                <span className="text-[10px] font-mono text-purple-300/40 tracking-[0.3em] uppercase">v1.4.6 FINAL DVH FIX</span>
             </div>
         </div>
     );
@@ -880,12 +880,9 @@ export default function App() {
   );
 
   return (
-    // CHANGED: Use fixed top-0 left-0 and oversized background to eliminate the black bar
-    <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center font-sans select-none overflow-hidden touch-none">
+    // CHANGED: Use relative + 100dvh for cleaner PWA layout without safe area clipping issues caused by fixed position
+    <div className="relative w-full h-[100dvh] flex items-center justify-center font-sans select-none overflow-hidden touch-none bg-[#0f172a]">
         
-        {/* THIS IS THE FIX: A background layer that extends strictly beyond the bottom edge */}
-        <div className="absolute top-0 left-0 right-0 bottom-[-200px] bg-[#0f172a] z-[-10]" />
-
         {/* Main Game Container - Fixed for Mobile, Aspect Ratio for Desktop */}
         {/* CHANGED: Use absolute inset-0 to force fill entire viewport, fixing canvas cutoff issues */}
         <div className="absolute inset-0 md:relative md:inset-auto md:w-auto md:h-auto md:max-w-[45vh] md:max-h-[85vh] md:aspect-[9/16] bg-[#0f172a] shadow-[0_0_60px_black] md:border-x border-[#1e293b] flex flex-col">
